@@ -3,18 +3,23 @@
     "rooms": {
       "$code": {
         ".read": "auth != null",
+        ".write": "auth != null && root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid",
         "info": {
-          ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && data.parent().child('hostUid').val() === auth.uid))",
-          "passwordHash": { ".read": "auth != null" }
+          ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid))",
+          "passwordHash": {
+            "read": "auth != null"
+          }
         },
         "members": {
-          "$uid": { ".write": "auth != null && auth.uid === $uid" }
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid)"
+          }
         },
         "tracks": {
           ".write": "auth != null && root.child('rooms').child($code).child('members').child(auth.uid).exists()"
         },
         "playback": {
-          ".write": "auth != null && root.child('rooms').child($code).child('members').child(auth.uid).exists() && (!root.child('rooms').child($code).child('info').child('hostOnlyControl').val() || root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid)"
+          ".write": "auth != null && root.child('rooms').child($code).child('members').child(auth.uid).exists() && (root.child('rooms').child($code).child('info').child('hostOnlyControl').val() !== true || root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid)"
         },
         "messages": {
           "$messageId": {

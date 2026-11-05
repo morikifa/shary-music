@@ -33,22 +33,23 @@ They are **not verified by automated tests yet**.
     "rooms": {
       "$code": {
         ".read": "auth != null",
+        ".write": "auth != null && root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid",
         "info": {
-          ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && data.parent().child('hostUid').val() === auth.uid))",
+          ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid))",
           "passwordHash": {
-            ".read": "auth != null"
+            "read": "auth != null"
           }
         },
         "members": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid"
+            ".write": "auth != null && (auth.uid === $uid || root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid)"
           }
         },
         "tracks": {
           ".write": "auth != null && root.child('rooms').child($code).child('members').child(auth.uid).exists()"
         },
         "playback": {
-          ".write": "auth != null && root.child('rooms').child($code).child('members').child(auth.uid).exists() && (!root.child('rooms').child($code).child('info').child('hostOnlyControl').val() || root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid)"
+          ".write": "auth != null && root.child('rooms').child($code).child('members').child(auth.uid).exists() && (root.child('rooms').child($code).child('info').child('hostOnlyControl').val() !== true || root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid)"
         },
         "messages": {
           "$messageId": {
@@ -59,6 +60,21 @@ They are **not verified by automated tests yet**.
     }
   }
 }
+```
+
+### Two rules of the expression language worth knowing
+
+- `!` works **only on booleans**. `!data.child('x').val()` is rejected by the
+  console with *"! only operates on booleans"*, even if `x` happens to be
+  `false`. Write the comparison instead: `.val() !== true`.
+- `data.parent()` is the parent **of the node being written**. A second
+  `.parent()` does not exist, so the condition silently becomes false. Build
+  paths from `root`.
+
+`tools/check_rules.py` checks both patterns before publishing:
+
+```bash
+python3 tools/check_rules.py
 ```
 
 ### Why the old rule broke room creation
@@ -99,6 +115,21 @@ firebase deploy --only database --project shary-f5c42
 
 `firebase.json` in the repository root points at `database.rules.json`, so the
 file in Git and the rules in the console stay the same.
+
+### What each rule is for
+
+| Path | Who may write | Why |
+|---|---|---|
+| `rooms/$code` (`.write`) | host | closing the room removes the whole node (`closeRoom`) |
+| `info` | anyone when the node is empty, later the host only | creating the room, then password, `isClosed`, `hostOnlyControl` |
+| `members/$uid` | that member, or the host | joining and leaving, plus kicking |
+| `tracks` | any member | adding a track to the room playlist |
+| `playback` | any member when `hostOnlyControl` is off, otherwise the host | keeping playback state in sync |
+| `messages/$id` | the sender, as a member | chat |
+
+Without the root `.write` for the host, closing a room failed with permission
+denied but the room node stayed alive and other members kept "seeing" it.
+Without the host branch in `members/$uid`, kicking a member did nothing.
 
 ### Known limitations
 

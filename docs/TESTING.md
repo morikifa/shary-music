@@ -32,6 +32,19 @@ creation and join, chat validation.
 
 These must be repeated on a real device after UI changes.
 
+### Firebase rules
+
+Run before publishing rules, and after any change to `database.rules.json`:
+
+```bash
+python3 tools/check_rules.py
+```
+
+The console rejects a rules file with messages like
+`! only operates on booleans` and saves nothing, so this check catches the two
+mistakes that already cost a debugging round: `!` applied to `.val()` and
+`data.parent().parent()`.
+
 ### Start-up (regression for D-012)
 
 1. Cold start: the app must stay open and show either onboarding or the player.
