@@ -63,9 +63,12 @@ fun MemberAvatar(
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         if (member.avatarPath != null) {
+            // Пустое имя не должно становиться пустой подписью для TalkBack
             AsyncImage(
                 model = member.avatarPath,
-                contentDescription = member.displayName,
+                contentDescription = member.displayName.ifBlank {
+                    stringResource(R.string.room_participant_default)
+                },
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(size)
