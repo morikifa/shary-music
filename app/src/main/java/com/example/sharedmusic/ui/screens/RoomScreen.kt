@@ -271,7 +271,12 @@ fun RoomScreen(
                     }
 
                     Text(
-                        text = if (isMe) stringResource(R.string.room_you) else member.displayName,
+                        text = when {
+                            isMe -> stringResource(R.string.room_you)
+                            member.displayName.isBlank() ->
+                                stringResource(R.string.room_participant_default)
+                            else -> member.displayName
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isHostMember) {
                             MaterialTheme.colorScheme.primary
@@ -547,7 +552,16 @@ fun RoomScreen(
         AlertDialog(
             onDismissRequest = { memberForKick = null },
             title = { Text(stringResource(R.string.room_kick)) },
-            text = { Text(stringResource(R.string.room_kick_confirm, pendingKick.displayName)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.room_kick_confirm,
+                        pendingKick.displayName.ifBlank {
+                            stringResource(R.string.room_participant_default)
+                        }
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -654,6 +668,11 @@ private fun VerticalSeekBar(
     }
 }
 
+/** Название трека для TalkBack: пустое заменяется подписью из ресурсов */
+@Composable
+private fun trackTitleLabel(title: String): String =
+    title.ifBlank { stringResource(R.string.track_untitled) }
+
 /** Вертикальная лента треков комнаты: листается вверх-вниз */
 @Composable
 private fun VerticalTrackRail(
@@ -721,7 +740,7 @@ private fun VerticalTrackRail(
                         artworkPath = null,
                         seed = item.track.trackId,
                         cornerRadius = 14.dp,
-                        contentDescription = item.track.title,
+                        contentDescription = trackTitleLabel(item.track.title),
                         modifier = Modifier.size(60.dp)
                     )
 

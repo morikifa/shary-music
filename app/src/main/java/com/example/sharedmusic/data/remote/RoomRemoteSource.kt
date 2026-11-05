@@ -505,8 +505,10 @@ class RoomRemoteSource(
                     val uid = child.key ?: return@mapNotNull null
                     RoomMember(
                         uid = uid,
-                        displayName = child.child("name").getValue(String::class.java)
-                            ?: "Участник",
+                        // Пустое имя разрешено: подпись по умолчанию добавит экран
+                        displayName = child.child("name")
+                            .getValue(String::class.java)
+                            .orEmpty(),
                         role = RoomRole.fromName(
                             child.child("role").getValue(String::class.java)
                         )
@@ -525,7 +527,7 @@ class RoomRemoteSource(
                     val trackId = child.key ?: return@mapNotNull null
                     RoomTrack(
                         trackId = trackId,
-                        title = child.child("title").getValue(String::class.java) ?: "Трек",
+                        title = child.child("title").getValue(String::class.java).orEmpty(),
                         artist = child.child("artist").getValue(String::class.java).orEmpty(),
                         addedByUid = child.child("addedBy").getValue(String::class.java).orEmpty(),
                         downloadUrl = child.child("downloadUrl")

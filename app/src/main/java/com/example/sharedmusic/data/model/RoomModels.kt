@@ -14,6 +14,7 @@ enum class RoomRole {
 /** Участник комнаты */
 data class RoomMember(
     val uid: String,
+    /** Пустая строка допустима: подпись «Участник» подставляет UI из ресурсов */
     val displayName: String,
     val avatarPath: String? = null,
     val role: RoomRole = RoomRole.MEMBER,
