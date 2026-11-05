@@ -61,7 +61,19 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
     val chatError: StateFlow<MessageRes?> = _chatError.asStateFlow()
 
     private val _notice = MutableStateFlow<MessageRes?>(null)
+
+    /**
+     * Технический текст последнего отказа Firebase.
+     *
+     * Показывается под сообщением мелким шрифтом: без него «Нет соединения»
+     * одинаково выглядит при отсутствии сети, при неверном адресе базы и при
+     * запрете записи правилами, а причину приходилось угадывать.
+     */
+    private val _noticeDetails = MutableStateFlow<String?>(null)
     val notice: StateFlow<MessageRes?> = _notice.asStateFlow()
+
+    /** Техническая причина под сообщением; null, если её нет */
+    val noticeDetails: StateFlow<String?> = _noticeDetails.asStateFlow()
 
     private val _isSending = MutableStateFlow(false)
     val isSending: StateFlow<Boolean> = _isSending.asStateFlow()
@@ -142,10 +154,11 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
                     password = password
                 )
             ) {
-                is RoomRemoteSource.RoomResult.Success ->
+                is RoomRemoteSource.RoomResult.Success -> {
+                    _noticeDetails.value = null
                     _notice.value = MessageRes(R.string.room_created, listOf(result.code))
-                is RoomRemoteSource.RoomResult.Failure ->
-                    _notice.value = messageFor(result.kind)
+                }
+                is RoomRemoteSource.RoomResult.Failure -> showFailure(result)
             }
         }
     }
@@ -170,9 +183,11 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
             val name = resolveDisplayName()
 
             when (val result = session.joinRoom(normalized, auth.uid, name, password)) {
-                is RoomRemoteSource.RoomResult.Success -> _notice.value = null
-                is RoomRemoteSource.RoomResult.Failure ->
-                    _notice.value = messageFor(result.kind)
+                is RoomRemoteSource.RoomResult.Success -> {
+                    _notice.value = null
+                    _noticeDetails.value = null
+                }
+                is RoomRemoteSource.RoomResult.Failure -> showFailure(result)
             }
         }
     }
@@ -390,8 +405,22 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         RoomRemoteSource.FailureKind.WRONG_PASSWORD -> MessageRes(R.string.room_wrong_password)
         RoomRemoteSource.FailureKind.FULL -> MessageRes(R.string.room_full)
         RoomRemoteSource.FailureKind.CLOSED -> MessageRes(R.string.room_closed)
+        RoomRemoteSource.FailureKind.PERMISSION_DENIED ->
+            MessageRes(R.string.room_permission_denied)
         RoomRemoteSource.FailureKind.NO_CONNECTION -> MessageRes(R.string.room_no_connection)
+        RoomRemoteSource.FailureKind.NO_FREE_CODE -> MessageRes(R.string.room_no_free_code)
         RoomRemoteSource.FailureKind.UNKNOWN -> MessageRes(R.string.state_error_generic)
+    }
+
+    /**
+     * Показывает отказ комнаты вместе с технической причиной.
+     *
+     * Причина приходит из Firebase как есть (по-английски) и попадает
+     * под сообщением, а не вместо него: основной текст остаётся из strings.xml.
+     */
+    private fun showFailure(failure: RoomRemoteSource.RoomResult.Failure) {
+        _notice.value = messageFor(failure.kind)
+        _noticeDetails.value = failure.reason.ifBlank { null }
     }
 }
 
