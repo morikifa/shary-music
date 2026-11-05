@@ -2,6 +2,8 @@ package com.example.sharedmusic.data.player
 
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -15,6 +17,10 @@ import androidx.media3.exoplayer.ExoPlayer
  *
  * Экземпляр один на всё приложение: он создаётся в PlayerContainer,
  * поэтому воспроизведение не прерывается при переходах между экранами.
+ *
+ * ExoPlayer строго проверяет поток: любое обращение к нему должно идти
+ * с того потока, где объект создан. Здесь это главный поток, поэтому
+ * сам плеер и все его методы завернуты в `callOnPlayerThread`.
  */
 class MusicPlayer(context: Context) {
 
@@ -29,7 +35,12 @@ class MusicPlayer(context: Context) {
 
     private var listener: Listener? = null
 
-    val player: ExoPlayer = ExoPlayer.Builder(context.applicationContext)
+    /** Поток, на котором создан плеер: только с него к нему можно обращаться */
+    private val playerLooper: Looper = Looper.getMainLooper()
+
+    private val playerHandler = Handler(playerLooper)
+
+    private val player: ExoPlayer = ExoPlayer.Builder(context.applicationContext)
         .setAudioAttributes(
             AudioAttributes.Builder()
                 .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -42,9 +53,13 @@ class MusicPlayer(context: Context) {
 
     /** Усиление звука эквалайзером, привязывается к аудиосессии плеера */
     val audioSessionId: Int
-        get() = player.audioSessionId
+        get() = readOnPlayerThread { player.audioSessionId } ?: 0
 
     init {
+        require(Looper.myLooper() == playerLooper) {
+            "MusicPlayer must be created on the main thread"
+        }
+
         player.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -68,24 +83,52 @@ class MusicPlayer(context: Context) {
         })
     }
 
+    /**
+     * Выполняет блок на потоке плеера.
+     *
+     * С главного потока блок исполняется сразу и результат возвращается
+     * вызывающему. С фоновой корутины (загрузка из комнаты, например)
+     * команда встаёт в очередь главного потока — плеер не падает с
+     * «Player is accessed on the wrong thread».
+     */
+    private fun callOnPlayerThread(block: () -> Unit) {
+        if (Looper.myLooper() == playerLooper) {
+            block()
+        } else {
+            playerHandler.post(block)
+        }
+    }
+
+    /**
+     * Читает значение с потока плеера.
+     *
+     * ExoPlayer не разрешает читать позицию и длительность из другого потока,
+     * поэтому с чужого потока возвращается null, а не исключение: интерфейс
+     * не должен падать из-за того, что опрос попал не на тот поток.
+     */
+    private fun <T> readOnPlayerThread(block: () -> T): T? {
+        if (Looper.myLooper() != playerLooper) return null
+        return block()
+    }
+
     fun setListener(listener: Listener?) {
         this.listener = listener
     }
 
     val currentPositionMs: Long
-        get() = player.currentPosition.coerceAtLeast(0L)
+        get() = readOnPlayerThread { player.currentPosition.coerceAtLeast(0L) } ?: 0L
 
     val durationMs: Long
-        get() {
+        get() = readOnPlayerThread {
             val duration = player.duration
-            return if (duration == C.TIME_UNSET || duration < 0L) 0L else duration
-        }
+            if (duration == C.TIME_UNSET || duration < 0L) 0L else duration
+        } ?: 0L
 
     val isPlaying: Boolean
-        get() = player.isPlaying
+        get() = readOnPlayerThread { player.isPlaying } ?: false
 
     val currentMediaId: String?
-        get() = player.currentMediaItem?.mediaId
+        get() = readOnPlayerThread { player.currentMediaItem?.mediaId }
 
     /** Загружает трек и запускает воспроизведение с указанной позиции */
     fun play(
@@ -94,8 +137,8 @@ class MusicPlayer(context: Context) {
         title: String,
         artist: String,
         startPositionMs: Long = 0L
-    ) {
-        if (currentMediaId != trackId) {
+    ) = callOnPlayerThread {
+        if (player.currentMediaItem?.mediaId != trackId) {
             player.setMediaItem(buildItem(trackId, uri, title, artist))
             player.prepare()
         }
@@ -111,8 +154,8 @@ class MusicPlayer(context: Context) {
         title: String,
         artist: String,
         positionMs: Long = 0L
-    ) {
-        if (currentMediaId != trackId) {
+    ) = callOnPlayerThread {
+        if (player.currentMediaItem?.mediaId != trackId) {
             player.setMediaItem(buildItem(trackId, uri, title, artist))
             player.prepare()
         }
@@ -121,12 +164,12 @@ class MusicPlayer(context: Context) {
         player.seekTo(positionMs.coerceAtLeast(0L))
     }
 
-    fun pause() {
+    fun pause() = callOnPlayerThread {
         player.pause()
     }
 
-    fun resume() {
-        if (player.mediaItemCount == 0) return
+    fun resume() = callOnPlayerThread {
+        if (player.mediaItemCount == 0) return@callOnPlayerThread
 
         if (player.playbackState == Player.STATE_ENDED) {
             player.seekTo(0L)
@@ -136,20 +179,27 @@ class MusicPlayer(context: Context) {
     }
 
     fun seekTo(positionMs: Long) {
-        player.seekTo(positionMs.coerceAtLeast(0L))
-        listener?.onPositionChanged(currentPositionMs, durationMs)
+        // Позиция для UI снимается сразу после команды, поэтому сообщаем её
+        // изнутри того же блока: чтение с чужого потока вернуло бы null
+        callOnPlayerThread {
+            player.seekTo(positionMs.coerceAtLeast(0L))
+            listener?.onPositionChanged(
+                player.currentPosition.coerceAtLeast(0L),
+                player.duration.let { if (it == C.TIME_UNSET || it < 0L) 0L else it }
+            )
+        }
     }
 
-    fun setVolume(volume: Float) {
+    fun setVolume(volume: Float) = callOnPlayerThread {
         player.volume = volume.coerceIn(0f, 1f)
     }
 
-    fun stop() {
+    fun stop() = callOnPlayerThread {
         player.pause()
         player.seekTo(0L)
     }
 
-    fun release() {
+    fun release() = callOnPlayerThread {
         player.release()
     }
 

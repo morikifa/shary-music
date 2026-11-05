@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -37,7 +38,10 @@ import com.example.sharedmusic.R
 
 /**
  * Поиск по библиотеке: лупа в шапке, раскрывающееся поле ввода.
- * Поиск есть и на главном экране, и в плеере, и в комнате — это один компонент.
+ *
+ * Пока поиск закрыт, компонент занимает ровно размер кнопки. Иначе строка
+ * шапки получала нулевую ширину при `weight(0f)` и лупа выталкивала логотип
+ * и название за край экрана.
  */
 @Composable
 fun SearchBar(
@@ -79,6 +83,7 @@ fun SearchBar(
         ) {
             Row(
                 modifier = Modifier
+                    .widthIn(min = 220.dp)
                     .fillMaxWidth()
                     .height(44.dp)
                     .clip(RoundedCornerShape(22.dp))

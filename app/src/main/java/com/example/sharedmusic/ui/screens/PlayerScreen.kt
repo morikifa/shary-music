@@ -160,7 +160,8 @@ fun PlayerScreen(
                 onQueryChange = onSearchChange,
                 onOpen = onSearchOpen,
                 onClose = onSearchClose,
-                modifier = Modifier.weight(if (isSearchActive) 1.6f else 0f)
+                // Раскрытая строка поиска забирает свободное место в шапке
+                modifier = if (isSearchActive) Modifier.weight(1f) else Modifier
             )
         }
 

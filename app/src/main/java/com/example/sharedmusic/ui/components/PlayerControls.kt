@@ -222,6 +222,10 @@ private fun SubduedSeekBar(
 ) {
     var isDragging by remember { mutableStateOf(false) }
 
+    // Последняя позиция пальца: value приходит из композиции с задержкой,
+    // поэтому отпускание отдаёт именно то место, где палец остановился
+    var lastFraction by remember { mutableStateOf(progress) }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -229,19 +233,24 @@ private fun SubduedSeekBar(
             .pointerInput(enabled) {
                 if (!enabled) return@pointerInput
 
+                fun fractionOf(x: Float): Float =
+                    (x / size.width.toFloat()).coerceIn(0f, 1f)
+
                 detectHorizontalDragGestures(
                     onDragStart = { offset ->
                         isDragging = true
-                        onScrub((offset.x / size.width.toFloat()).coerceIn(0f, 1f))
+                        lastFraction = fractionOf(offset.x)
+                        onScrub(lastFraction)
                     },
                     onDragEnd = {
                         isDragging = false
-                        onRelease(progress)
+                        onRelease(lastFraction)
                     },
                     onDragCancel = { isDragging = false }
                 ) { change, _ ->
                     change.consume()
-                    onScrub((change.position.x / size.width.toFloat()).coerceIn(0f, 1f))
+                    lastFraction = fractionOf(change.position.x)
+                    onScrub(lastFraction)
                 }
             },
         contentAlignment = Alignment.CenterStart

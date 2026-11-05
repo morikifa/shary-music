@@ -5,6 +5,7 @@ import com.example.sharedmusic.data.player.MusicPlayer
 import com.example.sharedmusic.domain.SyncPolicy
 import com.example.sharedmusic.domain.SyncDecision
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -222,10 +223,19 @@ class PlaybackController(
         onPublishState?.invoke(trackId, _positionMs.value, _isPlaying.value)
     }
 
+    /**
+     * Опрос позиции идёт на главном потоке.
+     *
+     * ExoPlayer принадлежит главному потоку и не отдаёт позицию с других
+     * потоков, поэтому тикер, созданный в `scope` приложения на
+     * `Dispatchers.Default`, немедленно падал бы с обращением не из того
+     * потока. `Dispatchers.Main.immediate` сохраняет отзывчивость: чтение
+     * позиции — дешёвая операция, а `delay` не занимает поток.
+     */
     private fun startTicker() {
         tickerJob?.cancel()
 
-        tickerJob = scope.launch {
+        tickerJob = scope.launch(Dispatchers.Main.immediate) {
             while (isActive) {
                 _positionMs.value = player.currentPositionMs
 
