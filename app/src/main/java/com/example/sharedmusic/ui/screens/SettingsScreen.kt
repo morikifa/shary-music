@@ -43,7 +43,7 @@ import com.example.sharedmusic.R
 import com.example.sharedmusic.data.model.ThemeMode
 import com.example.sharedmusic.data.model.UserSettings
 import com.example.sharedmusic.ui.components.SharyIconButton
-import com.example.sharedmusic.ui.components.SharyLogo
+import com.example.sharedmusic.ui.components.SharyTopBar
 import com.example.sharedmusic.ui.theme.SharyPink
 import com.example.sharedmusic.ui.theme.SharyTheme
 
@@ -83,13 +83,10 @@ fun SettingsScreen(
                 iconSize = 20.dp
             )
 
-            SharyLogo(size = 26.dp)
-
-            Text(
-                text = stringResource(R.string.settings_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 10.dp)
+            SharyTopBar(
+                modifier = Modifier.weight(1f),
+                logoSize = 26.dp,
+                title = stringResource(R.string.settings_title)
             )
         }
 

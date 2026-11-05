@@ -35,7 +35,7 @@ import com.example.sharedmusic.R
 import com.example.sharedmusic.data.model.HistoryEntry
 import com.example.sharedmusic.domain.TimeFormat
 import com.example.sharedmusic.ui.components.SharyIconButton
-import com.example.sharedmusic.ui.components.SharyLogo
+import com.example.sharedmusic.ui.components.SharyTopBar
 import com.example.sharedmusic.ui.components.TrackArtwork
 import com.example.sharedmusic.ui.theme.SharyTheme
 import java.text.SimpleDateFormat
@@ -55,10 +55,11 @@ fun HistoryScreen(
     var confirmClear by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
+        // Шапка: логотип, заголовок и очистка истории — общий компонент приложения
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 4.dp),
+                .padding(start = 8.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SharyIconButton(
@@ -69,23 +70,18 @@ fun HistoryScreen(
                 iconSize = 20.dp
             )
 
-            SharyLogo(size = 26.dp)
-
-            Text(
-                text = stringResource(R.string.history_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
-            )
-
-            if (entries.isNotEmpty()) {
-                SharyIconButton(
-                    icon = Icons.Rounded.Delete,
-                    contentDescription = stringResource(R.string.history_clear),
-                    onClick = { confirmClear = true }
-                )
+            SharyTopBar(
+                modifier = Modifier.weight(1f),
+                logoSize = 26.dp,
+                title = stringResource(R.string.history_title)
+            ) {
+                if (entries.isNotEmpty()) {
+                    SharyIconButton(
+                        icon = Icons.Rounded.Delete,
+                        contentDescription = stringResource(R.string.history_clear),
+                        onClick = { confirmClear = true }
+                    )
+                }
             }
         }
 
