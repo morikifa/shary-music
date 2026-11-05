@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.sharedmusic.R
 import com.example.sharedmusic.SharyApplication
 import com.example.sharedmusic.core.SharyConfig
+import com.example.sharedmusic.data.local.NetworkStatus
 import com.example.sharedmusic.data.model.ChatMessage
 import com.example.sharedmusic.data.model.RoomMember
 import com.example.sharedmusic.data.model.RoomRole
@@ -315,6 +316,13 @@ class RoomViewModel(application: Application) : AndroidViewModel(application) {
         if (_isTransferring.value) return
 
         viewModelScope.launch {
+            // Настройка «только Wi-Fi»: в мобильной сети загрузка не начинается
+            val wifiOnly = app.settingsStore.settings.first().downloadOverWifiOnly
+            if (wifiOnly && !NetworkStatus.isUnmetered(app)) {
+                _notice.value = MessageRes(R.string.library_wifi_required)
+                return@launch
+            }
+
             _isTransferring.value = true
             _transferProgress.value = 0
 

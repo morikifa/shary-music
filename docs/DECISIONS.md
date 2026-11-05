@@ -153,3 +153,26 @@ Consequences:
 - a unit test cannot assert the visible text — it asserts the resource id;
 - the number of format arguments is checked by hand (no lint run in this
   sandbox).
+
+---
+
+## D-011 — Wi-Fi only blocks room downloads; equalizer is wired to the session
+
+**Date:** 2026-11-05
+**Status:** accepted
+
+Two settings were persisted but had no effect on behaviour. Both are now
+connected:
+
+- `UserSettings.downloadOverWifiOnly` is checked in `RoomViewModel.downloadTrack`
+  and `PlayerViewModel.downloadCurrentRoomTrack` through
+  `data/local/NetworkStatus.isUnmetered()`. In a mobile network the download is
+  not started and the user sees "Загрузка начнётся только по Wi-Fi…".
+- `EqualizerController` is created in `SharyApplication`, attached to the
+  ExoPlayer audio session and re-applied on every settings change
+  (`SharyApplication.syncEqualizer()` is also called after the first track
+  starts, because the session id is only known then).
+
+Not implemented on purpose: `MediaSessionService` and background playback
+(see D-007), and a 10-band editor — the equalizer exposes four bands mapped
+onto real device bands.

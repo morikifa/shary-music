@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.sharedmusic.R
 import com.example.sharedmusic.SharyApplication
 import com.example.sharedmusic.core.SharyConfig
+import com.example.sharedmusic.data.local.NetworkStatus
 import com.example.sharedmusic.data.local.TrackImporter
 import com.example.sharedmusic.data.model.HistoryEntry
 import com.example.sharedmusic.data.model.RoomPlayback
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -161,6 +163,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             title = track.title,
             artist = track.artist
         )
+
+        // Аудиосессия появляется после старта: подключаем эквалайзер к ней
+        viewModelScope.launch { app.syncEqualizer() }
 
         lastPublishedKey = ""
         recordListenStart(track)
@@ -337,6 +342,13 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         if (roomTrack.downloadUrl.isBlank() || _isTransferring.value) return
 
         viewModelScope.launch {
+            // Настройка «только Wi-Fi»: в мобильной сети загрузка не начинается
+            val wifiOnly = app.settingsStore.settings.first().downloadOverWifiOnly
+            if (wifiOnly && !NetworkStatus.isUnmetered(app)) {
+                _message.value = MessageRes(R.string.library_wifi_required)
+                return@launch
+            }
+
             _isTransferring.value = true
 
             val destination = File(app.cacheDir, "room_${roomTrack.trackId}.audio")

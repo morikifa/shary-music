@@ -38,6 +38,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val profile: StateFlow<UserProfile> = app.profileStore.profile
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserProfile())
 
+    /** Прочитан ли профиль: до первого значения нельзя выбирать стартовый экран */
+    private val _profileLoaded = MutableStateFlow(false)
+    val profileLoaded: StateFlow<Boolean> = _profileLoaded.asStateFlow()
+
     val settings: StateFlow<UserSettings> = app.settingsStore.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserSettings())
 
@@ -54,6 +58,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val roomHours: StateFlow<String> = _roomHours.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            app.profileStore.profile.collect { _profileLoaded.value = true }
+        }
+
         viewModelScope.launch {
             app.trackStore.observeTracks().collect { tracks ->
                 _trackCount.value = tracks.size

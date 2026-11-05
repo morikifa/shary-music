@@ -53,6 +53,7 @@
     <string name="library_show_all">Все треки</string>
     <string name="library_import_failed">Не удалось добавить файл %1$s</string>
     <string name="track_row_subtitle">%1$s · %2$s</string>
+    <string name="library_wifi_required">Загрузка начнётся только по Wi-Fi: так выбрано в настройках</string>
     <string name="library_delete_track">Удалить трек</string>
     <string name="library_delete_confirm">Удалить «%1$s» из библиотеки? Файл будет удалён с устройства.</string>
     <string name="library_liked_title">Понравившиеся</string>

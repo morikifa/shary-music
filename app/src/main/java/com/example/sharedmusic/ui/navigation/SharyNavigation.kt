@@ -76,6 +76,7 @@ fun SharyNavigation(
 ) {
     val profile by appViewModel.profile.collectAsStateWithLifecycle()
     val settings by appViewModel.settings.collectAsStateWithLifecycle()
+    val profileLoaded by appViewModel.profileLoaded.collectAsStateWithLifecycle()
 
     val navController = rememberNavController()
 
@@ -86,6 +87,10 @@ fun SharyNavigation(
             modifier = modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
+            // Профиль ещё читается из DataStore: стартовый экран неизвестен,
+            // поэтому вместо мигания онбордингом показываем пустой фон
+            if (!profileLoaded) return@Surface
+
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
@@ -112,8 +117,10 @@ fun SharyNavigation(
                     OnboardingScreen(
                         onContinue = { name ->
                             appViewModel.saveDisplayName(name)
+                            // popUpTo(граф) без inclusive: онбординг уходит из стека,
+                            // а плеер становится единственным экраном
                             navController.navigate(Routes.PLAYER) {
-                                popUpTo(Routes.ONBOARDING) { inclusive = true }
+                                popUpTo(navController.graph.id) { inclusive = true }
                             }
                         }
                     )
@@ -486,8 +493,17 @@ private fun ChatRoute(
 
     val context = LocalContext.current
 
+    val code = roomCode
+
+    // Без активной комнаты чат не имеет смысла: сразу возвращаемся
+    LaunchedEffect(code) {
+        if (code == null) onClose()
+    }
+
+    if (code == null) return
+
     ChatSheet(
-        roomCode = roomCode.orEmpty(),
+        roomCode = code,
         messages = messages,
         input = input,
         error = error?.resolve(context),
@@ -520,7 +536,14 @@ private fun ProfileRoute(
         onSaveName = appViewModel::saveDisplayName,
         onSaveAvatar = appViewModel::saveAvatar,
         onOpenHistory = onOpenHistory,
-        onSignOut = appViewModel::signOut
+        onSignOut = {
+            appViewModel.signOut()
+            // После выхода имя сброшено — пользователь снова проходит онбординг,
+            // а весь прежний стек убирается целиком.
+            navController.navigate(Routes.ONBOARDING) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
     )
 }
 

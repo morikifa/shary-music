@@ -66,7 +66,9 @@ These must be repeated on a real device after UI changes.
 
 1. Equalizer: enabling changes the sound on a device that supports it; on a
    device without support nothing breaks.
-2. Wi-Fi only: the switch survives an app restart.
+2. Wi-Fi only: the switch survives an app restart. With the switch on and the
+   phone on mobile data, downloading a room track shows "Загрузка начнётся
+   только по Wi-Fi…" and does not start; on Wi-Fi the same action downloads.
 3. Theme: dark / light / system applied immediately and after restart.
 4. Profile: change the name and the avatar; the new avatar appears in a room.
 5. History: entries appear grouped by day, "Очистить историю" empties the list.
