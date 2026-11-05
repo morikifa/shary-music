@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SHARY</string>
+    <string name="app_tagline">Слушай вместе</string>
+
+    <!-- Общие действия -->
+    <string name="action_cancel">Отмена</string>
+    <string name="action_save">Сохранить</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_close">Закрыть</string>
+    <string name="action_back">Назад</string>
+    <string name="action_search">Поиск</string>
+    <string name="action_clear">Очистить</string>
+
+    <!-- Постоянная метка режима -->
+    <string name="mode_local">Локально</string>
+    <string name="mode_room">Комната %1$s</string>
+
+    <!-- Главный экран / плеер -->
+    <string name="player_no_track">Трек не выбран</string>
+    <string name="player_add_tracks">Добавить музыку</string>
+    <string name="player_play">Воспроизвести</string>
+    <string name="player_pause">Пауза</string>
+    <string name="player_next">Следующий трек</string>
+    <string name="player_previous">Предыдущий трек</string>
+    <string name="player_shuffle">Перемешать</string>
+    <string name="player_repeat_one">Повтор одного трека</string>
+    <string name="player_like">Добавить в понравившиеся</string>
+    <string name="player_unlike">Убрать из понравившихся</string>
+    <string name="player_scrub_hint">Потяните пластинку по кругу, чтобы перемотать</string>
+    <string name="player_open_list">Список треков</string>
+    <string name="player_open_chat">Открыть чат комнаты</string>
+    <string name="player_download">Скачать трек на устройство</string>
+
+    <!-- Состояния экрана -->
+    <string name="state_empty_library">В библиотеке пока нет треков. Нажмите «+», чтобы добавить музыку.</string>
+    <string name="state_error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
+    <string name="state_offline">Вы офлайн. Локальное воспроизведение доступно, синхронизация комнаты требует интернета.</string>
+    <string name="state_no_results">Ничего не найдено</string>
+
+    <!-- Синхронизация комнаты -->
+    <string name="sync_synced">Синхронизировано</string>
+    <string name="sync_catching_up">Догоняю…</string>
+    <string name="sync_track_missing">Трек недоступен на вашем устройстве</string>
+    <string name="sync_guest_locked">Управляет хост комнаты</string>
+
+    <!-- Библиотека / список треков -->
+    <string name="library_title">Библиотека</string>
+    <string name="library_unknown_artist">Неизвестный исполнитель</string>
+    <string name="library_track_count">Треков: %1$d</string>
+    <string name="library_search_hint">Поиск по названию или исполнителю</string>
+    <string name="library_import_in_progress">Добавляем файлы…</string>
+    <string name="library_show_all">Все треки</string>
+    <string name="library_import_failed">Не удалось добавить файл %1$s</string>
+    <string name="track_row_subtitle">%1$s · %2$s</string>
+    <string name="library_wifi_required">Загрузка начнётся только по Wi-Fi: так выбрано в настройках</string>
+    <string name="library_delete_track">Удалить трек</string>
+    <string name="library_delete_confirm">Удалить «%1$s» из библиотеки? Файл будет удалён с устройства.</string>
+    <string name="library_liked_title">Понравившиеся</string>
+    <string name="library_liked_empty">Пока нет понравившихся треков</string>
+
+    <!-- Создание комнаты и вход -->
+    <string name="room_create">Создать комнату</string>
+    <string name="room_join">Войти по коду</string>
+    <string name="room_create_title">Новая комната</string>
+    <string name="room_join_title">Вход в комнату</string>
+    <string name="room_code_label">Код комнаты</string>
+    <string name="room_code_hint">6 символов</string>
+    <string name="room_code_invalid">Код состоит из 6 символов</string>
+    <string name="room_password_label">Пароль</string>
+    <string name="room_password_optional">Пароль (необязательно)</string>
+    <string name="room_capacity_label">Сколько человек</string>
+    <string name="room_capacity_value">%1$d чел.</string>
+    <string name="room_created">Комната %1$s создана</string>
+    <string name="room_not_found">Комната не найдена</string>
+    <string name="room_wrong_password">Неверный пароль комнаты</string>
+    <string name="room_closed">Комната закрыта</string>
+    <string name="room_full">В комнате нет свободных мест</string>
+    <string name="room_no_connection">Нет соединения с сервером</string>
+
+    <!-- Экран комнаты -->
+    <string name="room_leave">Выйти из комнаты</string>
+    <string name="room_copy_code">Копировать код</string>
+    <string name="room_share_code">Отправить код</string>
+    <string name="room_code_copied">Код скопирован</string>
+    <string name="room_share_text">Слушаем музыку вместе в SHARY. Код комнаты: %1$s</string>
+    <string name="room_participants">Участники</string>
+    <string name="room_participants_capacity">%1$d из %2$d</string>
+    <string name="room_you">Вы</string>
+    <string name="room_settings">Настройки комнаты</string>
+    <string name="room_settings_title">Управление комнатой</string>
+    <string name="room_change_password">Сменить пароль</string>
+    <string name="room_delete_room">Удалить комнату</string>
+    <string name="room_delete_confirm">Удалить комнату? Все участники вернутся к локальному прослушиванию.</string>
+    <string name="room_kick">Удалить участника</string>
+    <string name="room_kick_confirm">Удалить %1$s из комнаты?</string>
+    <string name="room_member_no_rights">Права есть только у хоста комнаты</string>
+    <string name="room_add_track">Добавить трек в комнату</string>
+    <string name="room_track_share">Отправить трек участникам</string>
+    <string name="room_download_missing">Скачать недостающие треки</string>
+    <string name="room_download_progress">Загрузка: %1$d%%</string>
+
+    <!-- Чат -->
+    <string name="chat_title">Чат</string>
+    <string name="chat_empty">Сообщений пока нет. Напишите первым.</string>
+    <string name="chat_input_hint">Сообщение…</string>
+    <string name="chat_send">Отправить сообщение</string>
+    <string name="chat_too_long">Максимум %1$d символов</string>
+    <string name="chat_empty_message">Сообщение не может быть пустым</string>
+    <string name="chat_offline">Чат требует интернета</string>
+    <string name="chat_error">Не удалось отправить сообщение</string>
+    <string name="chat_new_messages">Новые сообщения</string>
+
+    <!-- Настройки -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_equalizer">Эквалайзер</string>
+    <string name="settings_equalizer_enabled">Включён</string>
+    <string name="settings_equalizer_disabled">Выключен</string>
+    <string name="settings_band_bass">Низкие</string>
+    <string name="settings_band_mid">Средние</string>
+    <string name="settings_band_treble">Высокие</string>
+    <string name="settings_band_vocal">Голос</string>
+    <string name="settings_wifi_only">Скачивать только по Wi-Fi</string>
+    <string name="settings_wifi_only_description">Загрузка треков комнаты не начнётся в мобильной сети</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_system">Как в системе</string>
+    <string name="settings_section_playback">Воспроизведение</string>
+    <string name="settings_section_network">Сеть</string>
+    <string name="settings_section_appearance">Оформление</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_version">Версия %1$s</string>
+
+    <!-- Профиль -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_edit_name">Изменить имя</string>
+    <string name="profile_edit_photo">Изменить фото</string>
+    <string name="profile_remove_photo">Удалить фото</string>
+    <string name="profile_name_hint">Ваше имя</string>
+    <string name="profile_name_empty">Имя не может быть пустым</string>
+    <string name="profile_id">ID профиля</string>
+    <string name="profile_tracks_count">Треков в библиотеке</string>
+    <string name="profile_room_hours">Часов в комнатах</string>
+    <string name="profile_liked_count">В понравившихся</string>
+    <string name="profile_sign_out">Выйти из профиля</string>
+    <string name="profile_sign_out_confirm">Выйти из профиля? Библиотека останется на устройстве.</string>
+    <string name="profile_stat_hours">%1$s ч</string>
+
+    <!-- Онбординг -->
+    <string name="onboarding_title">Как вас зовут?</string>
+    <string name="onboarding_description">Имя увидят участники комнаты. Изменить его можно в профиле.</string>
+    <string name="onboarding_continue">Продолжить</string>
+
+    <!-- История -->
+    <string name="history_title">История</string>
+    <string name="history_empty">История пуста</string>
+    <string name="history_clear">Очистить историю</string>
+    <string name="history_clear_confirm">Очистить всю историю прослушивания?</string>
+    <string name="history_duration">Прослушано %1$s</string>
+    <string name="history_less_than_minute">меньше минуты</string>
+    <string name="history_minutes">%1$d мин</string>
+    <string name="history_hours_minutes">%1$d ч %2$d мин</string>
+    <string name="history_today">Сегодня</string>
+    <string name="history_yesterday">Вчера</string>
+    <string name="history_row_subtitle">%1$s · %2$s</string>
+
+    <!-- Ошибки -->
+    <string name="error_player">Не удалось воспроизвести трек</string>
+    <string name="error_player_file_missing">Файл не найден на устройстве</string>
+    <string name="error_auth">Не удалось войти в профиль</string>
+
+    <!-- Содержимое экранов для TalkBack -->
+    <string name="cd_avatar">Фото профиля</string>
+    <string name="cd_vinyl">Виниловая пластинка</string>
+    <string name="cd_cover_slider">Лента обложек треков</string>
+
+    <!-- Сообщения о результате действий -->
+    <string name="room_entry_title">Комната</string>
+    <string name="room_entry_description">Слушайте один трек вместе — каждый со своего телефона</string>
+    <string name="room_host_only_control">Управляет только хост</string>
+    <string name="room_host_only_control_hint">Остальные слушают и пишут в чат</string>
+    <string name="room_deleted_notice">Комната удалена</string>
+    <string name="room_left_notice">Комната закрыта</string>
+    <string name="room_password_changed">Пароль обновлён</string>
+    <string name="room_password_change_failed">Не удалось изменить пароль</string>
+    <string name="room_member_removed">Участник удалён</string>
+    <string name="room_share_only_host">Добавлять треки может только хост</string>
+    <string name="room_track_sent">Трек отправлен участникам комнаты %1$s</string>
+    <string name="room_track_send_failed">Не удалось отправить трек</string>
+    <string name="room_track_download_failed">Не удалось скачать трек</string>
+    <string name="room_participant_default">Участник</string>
+
+    <!-- Сообщения библиотеки и загрузок -->
+    <string name="library_added_count">Добавлено треков: %1$d</string>
+    <string name="library_failed_count">Не удалось добавить файлов: %1$d</string>
+    <string name="library_duplicates_only">Эти треки уже есть в библиотеке</string>
+    <string name="track_added_to_library">Трек добавлен в библиотеку</string>
+    <string name="track_add_failed">Не удалось добавить трек</string>
+    <string name="track_delete_failed">Не удалось удалить трек</string>
+    <string name="track_library_empty">В библиотеке нет треков</string>
+    <string name="track_untitled">Без названия</string>
+</resources>

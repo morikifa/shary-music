@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Артефакты сборки
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+output.json
+
+# Ключи и секреты (создаются локально владельцем, в git не попадают)
+*.jks
+*.keystore
+keystore.properties
+.env
+
+# Служебные файлы ОС
+.DS_Store
+*.log
+
+# Android Profiling
+*.hprof
