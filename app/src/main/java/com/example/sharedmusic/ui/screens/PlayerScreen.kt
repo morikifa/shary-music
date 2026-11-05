@@ -147,7 +147,7 @@ fun PlayerScreen(
                     .padding(start = 10.dp)
             ) {
                 Text(
-                    text = "SHARY",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )

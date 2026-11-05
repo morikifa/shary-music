@@ -55,7 +55,7 @@ fun OnboardingScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "SHARY",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
