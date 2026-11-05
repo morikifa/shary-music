@@ -7,7 +7,7 @@
         "info": {
           ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid))",
           "passwordHash": {
-            "read": "auth != null"
+            ".read": "auth != null"
           }
         },
         "members": {

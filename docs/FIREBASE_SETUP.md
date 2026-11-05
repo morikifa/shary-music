@@ -37,7 +37,7 @@ They are **not verified by automated tests yet**.
         "info": {
           ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && root.child('rooms').child($code).child('info').child('hostUid').val() === auth.uid))",
           "passwordHash": {
-            "read": "auth != null"
+            ".read": "auth != null"
           }
         },
         "members": {
@@ -70,6 +70,9 @@ They are **not verified by automated tests yet**.
 - `data.parent()` is the parent **of the node being written**. A second
   `.parent()` does not exist, so the condition silently becomes false. Build
   paths from `root`.
+- Reserved rule keys start with a dot: `.read`, `.write`, `.validate`. A key
+  written as `"read"` is a syntax error (*"Expected '.'"*) and the console
+  refuses to save the whole file, not just that line.
 
 `tools/check_rules.py` checks both patterns before publishing:
 
