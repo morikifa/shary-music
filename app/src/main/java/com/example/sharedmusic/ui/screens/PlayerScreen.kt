@@ -262,7 +262,8 @@ fun PlayerScreen(
                     onToggleRepeat = onToggleRepeat,
                     modifier = Modifier.padding(horizontal = 8.dp),
                     positionMs = positionMs,
-                    durationMs = durationMs
+                    durationMs = durationMs,
+                    onSeek = onSeek
                 )
 
                 // Статус синхронизации в комнате

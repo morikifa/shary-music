@@ -2,6 +2,7 @@ package com.example.sharedmusic.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,8 +64,13 @@ fun PlayerControls(
     onToggleRepeat: () -> Unit,
     modifier: Modifier = Modifier,
     positionMs: Long = 0L,
-    durationMs: Long = 0L
+    durationMs: Long = 0L,
+    onSeek: (Long) -> Unit = {}
 ) {
+    // Во время перетаскивания полосы показываем позицию пальца, а не плеера.
+    // rememberSaveable: поворот экрана не должен «терять» перемотку.
+    var scrubFraction by rememberSaveable { mutableStateOf<Float?>(null) }
+
     val playScale by animateFloatAsState(
         targetValue = if (isPlaying) 1f else 0.96f,
         label = "play-scale"
@@ -118,6 +128,19 @@ fun PlayerControls(
             )
         }
 
+        // Серая полоса прогресса: тянется пальцем, при перетаскивании розовеет
+        SubduedSeekBar(
+            progress = scrubFraction
+                ?: if (durationMs > 0L) positionMs.toFloat() / durationMs else 0f,
+            enabled = enabled && durationMs > 0L,
+            onScrub = { fraction -> scrubFraction = fraction },
+            onRelease = { fraction ->
+                if (durationMs > 0L) onSeek((durationMs * fraction).toLong())
+                scrubFraction = null
+            },
+            modifier = Modifier.padding(top = 10.dp, start = 20.dp, end = 20.dp)
+        )
+
         // Время прослушивания под кнопками
         Row(
             modifier = Modifier
@@ -126,7 +149,10 @@ fun PlayerControls(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = TimeFormat.clock(positionMs),
+                text = TimeFormat.clock(
+                    scrubFraction?.let { fraction -> (durationMs * fraction).toLong() }
+                        ?: positionMs
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -176,6 +202,82 @@ private fun PlayButton(
             tint = if (enabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(30.dp)
         )
+    }
+}
+
+/**
+ * Тонкая полоса перемотки: серая в покое, розовая при перетаскивании.
+ *
+ * Пока палец на полосе, значение отдаётся наружу дробью 0..1 —
+ * позиция применяется только на отпускании, чтобы не дёргать плеер.
+ */
+@Composable
+private fun SubduedSeekBar(
+    progress: Float,
+    enabled: Boolean,
+    onScrub: (Float) -> Unit,
+    onRelease: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isDragging by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(26.dp)
+            .pointerInput(enabled) {
+                if (!enabled) return@pointerInput
+
+                detectHorizontalDragGestures(
+                    onDragStart = { offset ->
+                        isDragging = true
+                        onScrub((offset.x / size.width.toFloat()).coerceIn(0f, 1f))
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        onRelease(progress)
+                    },
+                    onDragCancel = { isDragging = false }
+                ) { change, _ ->
+                    change.consume()
+                    onScrub((change.position.x / size.width.toFloat()).coerceIn(0f, 1f))
+                }
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        // Фон
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        )
+
+        // Заполненная часть: серая, пока пользователь не тянет полосу
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                .height(5.dp)
+                .clip(CircleShape)
+                .background(
+                    if (isDragging) {
+                        SharyPink
+                    } else {
+                        MaterialTheme.colorScheme.outline
+                    }
+                )
+        )
+
+        // Ползунок появляется только во время перетаскивания
+        if (isDragging) {
+            Box(
+                modifier = Modifier
+                    .size(14.dp)
+                    .clip(CircleShape)
+                    .background(SharyPink)
+            )
+        }
     }
 }
 
