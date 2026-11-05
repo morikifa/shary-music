@@ -187,3 +187,39 @@ without a second list.
 Not implemented on purpose: `MediaSessionService` and background playback
 (see D-007), and a 10-band editor — the equalizer exposes four bands mapped
 onto real device bands.
+
+---
+
+## D-012 — The player lives on the main thread; everything touching it follows
+
+**Date:** 2026-11-05
+**Status:** accepted
+
+The first launch on a device crashed a second after the splash screen. The
+cause was not the build: `PlaybackController` started its 200 ms position
+ticker in `SharyApplication.applicationScope`, which was
+`SupervisorJob() + Dispatchers.Default`. ExoPlayer checks the thread on every
+access and throws `IllegalStateException: Player is accessed on the wrong
+thread` — the ticker read `currentPosition` from a background thread
+immediately, before the first frame was drawn.
+
+The rule now is explicit and applied in three places:
+
+- `SharyApplication.applicationScope` defaults to `Dispatchers.Main.immediate`.
+  Heavy work still moves itself to `Dispatchers.IO`.
+- `PlaybackController.startTicker()` launches with `Dispatchers.Main.immediate`
+  even though the scope it receives may change later.
+- `MusicPlayer` owns one thread — the main looper. Every command goes through
+  `callOnPlayerThread`, which runs inline on the main thread and posts to the
+  main looper from any other. Position, duration and `isPlaying` are read
+  through `readOnPlayerThread`, which returns `null` on a foreign thread
+  instead of crashing; the wrappers turn that into `0L` / `false`.
+  `MusicPlayer` also asserts it is constructed on the main thread.
+
+Consequences:
+
+- the 200 ms tick costs one cheap call on the main thread, not a thread hop;
+- a background caller (a download finishing in `RoomViewModel`, for example)
+  can call `play()`/`seekTo()` safely — the command is queued, not rejected;
+- `kotlinx-coroutines-android` is now an explicit dependency instead of a
+  transitive one, because `Dispatchers.Main` is load-bearing.

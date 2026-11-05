@@ -32,6 +32,16 @@ creation and join, chat validation.
 
 These must be repeated on a real device after UI changes.
 
+### Start-up (regression for D-012)
+
+1. Cold start: the app must stay open and show either onboarding or the player.
+   A crash within a second of the splash is the wrong-thread bug, check
+   `adb logcat | grep "wrong thread"`.
+2. Start a track and leave the screen idle for 10 seconds: the time label keeps
+   counting, nothing crashes.
+3. Open the app from a room download and start playback — the sound must appear
+   even though the command arrives from a background coroutine.
+
 ### Player
 
 1. Add 3 tracks with long and short titles via the "+" button.

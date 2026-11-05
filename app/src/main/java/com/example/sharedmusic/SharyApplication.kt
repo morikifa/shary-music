@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Точка сборки зависимостей.
@@ -57,8 +58,15 @@ class SharyApplication : Application() {
     lateinit var equalizer: EqualizerController
         private set
 
-    /** Общая область корутин для задач, не привязанных к экрану */
-    val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * Общая область корутин для задач, не привязанных к экрану.
+     *
+     * По умолчанию это главный поток: всё, что рядом с ExoPlayer и
+     * Equalizer, обязано исполняться там же, где они созданы. Тяжёлые
+     * операции сами уходят в `withContext(Dispatchers.IO)`.
+     */
+    val applicationScope: CoroutineScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     val musicPlayer: MusicPlayer
         get() = PlayerContainer.player(this)
@@ -92,7 +100,9 @@ class SharyApplication : Application() {
         // Плеер создаётся сразу: звук не должен обрываться при переходах между экранами
         PlayerContainer.player(this)
 
-        // Эквалайзер подключается к аудиосессии и повторяет сохранённые настройки
+        // Эквалайзер подключается к аудиосессии и повторяет сохранённые настройки.
+        // Аудиосессия ExoPlayer доступна только с потока плеера, поэтому
+        // подписка живёт в области приложения с главным потоком по умолчанию.
         equalizer = EqualizerController()
         applicationScope.launch {
             val player = PlayerContainer.player(this@SharyApplication)
@@ -106,9 +116,9 @@ class SharyApplication : Application() {
      * Сession id становится известен только после старта воспроизведения,
      * поэтому вызывается не только при запуске процесса.
      */
-    suspend fun syncEqualizer() {
-        val sessionId = PlayerContainer.player(this).audioSessionId
-        if (sessionId <= 0) return
+    suspend fun syncEqualizer() = withContext(Dispatchers.Main.immediate) {
+        val sessionId = PlayerContainer.player(this@SharyApplication).audioSessionId
+        if (sessionId <= 0) return@withContext
 
         equalizer.attach(sessionId)
         equalizer.apply(settingsStore.settings.first())
