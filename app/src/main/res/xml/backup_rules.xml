@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include domain="database" path="." />
+    <include domain="sharedpref" path="." />
+    <include domain="file" path="library/" />
+    <!-- Настройки Firebase-сессии не бэкапим: профиль восстанавливается входом -->
+    <exclude domain="file" path="firebase/" />
+</full-backup-content>

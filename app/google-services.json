@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "94008973913",
+    "project_id": "shary-f5c42",
+    "storage_bucket": "shary-f5c42.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:94008973913:android:55868aaf8f9eeb07d72f48",
+        "android_client_info": {
+          "package_name": "com.example.sharedmusic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOID3-0BLR3WDJeQk3qSUpa5oEu2OV7YY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
