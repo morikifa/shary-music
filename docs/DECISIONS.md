@@ -147,6 +147,12 @@ it with `context.getString(id, *args)` at the moment of showing. Same rule for
 model-level labels: `HistoryEntry.modeLabel` and `Track.artistOrUnknown` were
 removed and turned into `stringResource` calls in Compose.
 
+Same for the data layer: `FirebaseGate.AuthResult.Failed.reason`,
+`RoomRemoteSource.RoomResult.Failure.reason` and `TrackImporter.ImportResult.Failure.reason`
+now carry technical codes (`auth_error`, `no_free_code`, `empty_file`), never
+sentences. Firebase messages arrive in English anyway, so the user-facing text
+is chosen from `kind`/failure type in the ViewModel.
+
 Consequences:
 
 - every new message costs one line in `res/values/strings.xml`;

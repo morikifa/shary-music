@@ -264,7 +264,7 @@ private fun TrackRow(
                 .padding(horizontal = 12.dp)
         ) {
             Text(
-                text = track.title,
+                text = track.title.ifBlank { stringResource(R.string.track_untitled) },
                 style = MaterialTheme.typography.titleMedium,
                 color = if (isCurrent) {
                     MaterialTheme.colorScheme.primary

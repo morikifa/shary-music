@@ -226,7 +226,9 @@ fun PlayerScreen(
 
                 // Название и исполнитель: длинное название уплывает
                 MarqueeText(
-                    text = currentTrack?.title ?: stringResource(R.string.player_no_track),
+                    text = currentTrack?.title?.ifBlank {
+                        stringResource(R.string.track_untitled)
+                    } ?: stringResource(R.string.player_no_track),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     fadeColor = MaterialTheme.colorScheme.surface,

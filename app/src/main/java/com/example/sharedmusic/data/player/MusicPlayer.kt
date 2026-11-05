@@ -58,7 +58,8 @@ class MusicPlayer(context: Context) {
             }
 
             override fun onPlayerError(error: PlaybackException) {
-                listener?.onPlayerError(error.message ?: "Ошибка воспроизведения")
+                // Текст для пользователя формирует ViewModel; здесь только причина
+                listener?.onPlayerError(error.message ?: "playback_error")
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

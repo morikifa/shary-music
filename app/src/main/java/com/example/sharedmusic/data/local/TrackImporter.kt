@@ -45,13 +45,13 @@ class TrackImporter(
 
             if (destination.length() == 0L) {
                 destination.delete()
-                return ImportResult.Failure(displayName, "Файл пуст")
+                return ImportResult.Failure(displayName, "empty_file")
             }
 
             val metadata = AudioMetadataReader.read(
                 context = context,
                 file = destination,
-                fallbackTitle = displayName.substringBeforeLast('.').ifBlank { "Трек" }
+                fallbackTitle = displayName.substringBeforeLast('.')
             )
 
             val trackId = TrackIdentity.weakId(
@@ -83,7 +83,7 @@ class TrackImporter(
 
             ImportResult.Success(track)
         } catch (error: Exception) {
-            ImportResult.Failure(displayName, error.message ?: "Неизвестная ошибка")
+            ImportResult.Failure(displayName, error.message ?: "unknown_error")
         }
     }
 
@@ -131,7 +131,7 @@ class TrackImporter(
 
     private fun copyToFile(uri: Uri, destination: File) {
         val input = context.contentResolver.openInputStream(uri)
-            ?: throw IllegalStateException("Нет доступа к файлу")
+            ?: throw IllegalStateException("no_access")
 
         input.use { source ->
             destination.outputStream().use { output ->

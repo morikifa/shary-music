@@ -16,7 +16,13 @@ import kotlinx.coroutines.tasks.await
  */
 object FirebaseGate {
 
-    /** Результат инициализации */
+    /**
+     * Результат входа.
+     *
+     * `reason` — техническая причина для логов, а не текст для пользователя:
+     * UI показывает свои строки из strings.xml и не зависит от формулировок
+     * Firebase, которые к тому же приходят на английском.
+     */
     sealed interface AuthResult {
         data class Ready(val uid: String) : AuthResult
         data class Failed(val reason: String) : AuthResult
@@ -46,7 +52,7 @@ object FirebaseGate {
     /** Инициализирует Firebase и выполняет анонимный вход, если пользователя нет */
     suspend fun ensureSignedIn(): AuthResult = try {
         if (!isAvailable) {
-            AuthResult.Failed("Firebase не настроен")
+            AuthResult.Failed("firebase_not_configured")
         } else {
             val user = auth.currentUser
 
@@ -55,14 +61,14 @@ object FirebaseGate {
             } else {
                 val created = auth.signInAnonymously().await().user
                 if (created == null) {
-                    AuthResult.Failed("Не удалось создать профиль")
+                    AuthResult.Failed("anonymous_sign_in_failed")
                 } else {
                     AuthResult.Ready(created.uid)
                 }
             }
         }
     } catch (error: Exception) {
-        AuthResult.Failed(error.message ?: "Ошибка авторизации")
+        AuthResult.Failed(error.message ?: "auth_error")
     }
 
     /** Текущий пользователь Firebase или null */

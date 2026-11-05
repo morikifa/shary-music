@@ -49,6 +49,10 @@ class RoomRemoteSource(
     /** Результат операции комнаты */
     sealed interface RoomResult {
         data class Success(val code: String) : RoomResult
+        /**
+         * @param reason техническая причина для логов; текст для пользователя
+         * выбирается по kind во ViewModel и берётся из strings.xml
+         */
         data class Failure(val kind: FailureKind, val reason: String = "") : RoomResult
     }
 
@@ -164,7 +168,7 @@ class RoomRemoteSource(
             )
         }
 
-        RoomResult.Failure(FailureKind.UNKNOWN, "Не удалось подобрать свободный код")
+        RoomResult.Failure(FailureKind.UNKNOWN, "no_free_code")
     }
 
     /** Входит в комнату по коду и паролю */
