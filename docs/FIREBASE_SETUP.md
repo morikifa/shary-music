@@ -34,7 +34,7 @@ They are **not verified by automated tests yet**.
       "$code": {
         ".read": "auth != null",
         "info": {
-          ".write": "auth != null && (!data.exists() || data.parent().parent().child('members/' + auth.uid).exists() && data.parent().child('hostUid').val() === auth.uid)",
+          ".write": "auth != null && (!data.exists() || (root.child('rooms').child($code).child('members').child(auth.uid).exists() && data.parent().child('hostUid').val() === auth.uid))",
           "passwordHash": {
             ".read": "auth != null"
           }
@@ -60,6 +60,45 @@ They are **not verified by automated tests yet**.
   }
 }
 ```
+
+### Why the old rule broke room creation
+
+The first published version of these rules used `data.parent().parent()`. In
+Realtime Database rules `data.parent()` means the **parent node** of the data
+being written, and `data.parent().parent()` means the grandparent — `info` has
+only one parent (`rooms/$code`), so the second `.parent()` evaluates to null and
+the condition is never true.
+
+Two consequences, both seen in the app:
+
+- `!data.exists()` is checked first, so creating a room worked on an empty node;
+  but any later write to `info` (password change, `isClosed`, `hostOnlyControl`)
+  was rejected with **Permission denied** — and the UI showed
+  "Нет соединения с сервером", because every database error was mapped to one
+  message.
+- after the room was created once, the same rule made re-joining the host
+  impossible.
+
+The rule now walks from the root explicitly. `root` is the whole database, so
+`root.child('rooms').child($code).child('members').child(auth.uid).exists()` is
+the correct membership check.
+
+### Deploying the rules
+
+Rules are not part of the APK: until they are published, the app keeps using
+whatever is in the console.
+
+Option A — copy `database.rules.json` into the console (Realtime Database →
+Rules → paste → **Publish**).
+
+Option B — deploy from the command line:
+
+```bash
+firebase deploy --only database --project shary-f5c42
+```
+
+`firebase.json` in the repository root points at `database.rules.json`, so the
+file in Git and the rules in the console stay the same.
 
 ### Known limitations
 

@@ -77,6 +77,10 @@
     <string name="room_closed">Комната закрыта</string>
     <string name="room_full">В комнате нет свободных мест</string>
     <string name="room_no_connection">Нет соединения с сервером</string>
+    <string name="room_no_free_code">Не удалось подобрать свободный код комнаты. Попробуйте ещё раз</string>
+    <string name="room_permission_denied">Сервер отклонил запрос: проверьте правила Realtime Database в консоли Firebase</string>
+    <string name="room_error_details">Техническая причина: %1$s</string>
+    <string name="room_error_details_unknown">причина не распознана</string>
 
     <!-- Экран комнаты -->
     <string name="room_leave">Выйти из комнаты</string>

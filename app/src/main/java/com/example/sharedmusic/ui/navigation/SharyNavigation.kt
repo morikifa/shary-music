@@ -162,6 +162,8 @@ fun SharyNavigation(
                     val roomCode by roomViewModel.roomCode.collectAsStateWithLifecycle()
                     val isLoading by roomViewModel.isLoading.collectAsStateWithLifecycle()
                     val notice by roomViewModel.notice.collectAsStateWithLifecycle()
+                    val noticeDetails by roomViewModel.noticeDetails
+                        .collectAsStateWithLifecycle()
 
                     // Как только комната создана или найдена, открываем её экран
                     LaunchedEffect(roomCode) {
@@ -177,6 +179,7 @@ fun SharyNavigation(
                     RoomEntryScreen(
                         isLoading = isLoading,
                         notice = notice?.resolve(context),
+                        noticeDetails = noticeDetails,
                         onCreateRoom = roomViewModel::createRoom,
                         onJoinRoom = roomViewModel::joinRoom,
                         onBack = { navController.popBackStack() }

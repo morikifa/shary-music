@@ -1,16 +1,19 @@
 package com.example.sharedmusic.data.remote
 
 import android.net.Uri
+import android.util.Log
 import com.example.sharedmusic.data.model.ChatMessage
 import com.example.sharedmusic.data.model.RoomMember
 import com.example.sharedmusic.data.model.RoomPlayback
 import com.example.sharedmusic.data.model.RoomRole
 import com.example.sharedmusic.data.model.RoomTrack
+import com.example.sharedmusic.domain.RemoteErrorClassifier
 import com.example.sharedmusic.domain.RoomCode
 import com.example.sharedmusic.domain.TrackIdentity
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
@@ -61,8 +64,22 @@ class RoomRemoteSource(
         WRONG_PASSWORD,
         FULL,
         CLOSED,
+        /**
+         * База отклонила операцию: не заданы правила или они не разрешают
+         * запись. Отделено от NO_CONNECTION, потому что лечится в консоли
+         * Firebase, а не проверкой интернета.
+         */
+        PERMISSION_DENIED,
+        /** Сети нет вовсе: запрос не дошёл до сервера */
         NO_CONNECTION,
+        /** Все попытки генерации кода попали в занятые */
+        NO_FREE_CODE,
         UNKNOWN
+    }
+
+    private companion object {
+        /** Тег для logcat: по нему видно настоящую причину отказа Firebase */
+        const val TAG = "SharyRoom"
     }
 
     private val database: FirebaseDatabase
@@ -70,6 +87,29 @@ class RoomRemoteSource(
 
     private val storage: FirebaseStorage?
         get() = runCatching { FirebaseStorage.getInstance() }.getOrNull()
+
+    /**
+     * Переводит исключение Firebase в вид отказа и пишет исходное сообщение в лог.
+     *
+     * Без этого любой сбой записи выглядел как «Нет соединения с сервером»:
+     * `runCatching` терял текст ошибки, и настоящую причину (правила, адрес
+     * базы, отсутствие сети) нельзя было увидеть ни в приложении, ни в logcat.
+     */
+    private fun failureOf(error: Throwable): RoomResult.Failure {
+        val message = error.message.orEmpty()
+
+        val kind = when {
+            RemoteErrorClassifier.isPermissionDenied(message, error is DatabaseException) ->
+                FailureKind.PERMISSION_DENIED
+            RemoteErrorClassifier.isOffline(message) -> FailureKind.NO_CONNECTION
+            else -> FailureKind.UNKNOWN
+        }
+
+        // Исходный текст уходит в logcat: в интерфейсе он сокращается
+        Log.e(TAG, "room request failed ($kind): $message", error)
+
+        return RoomResult.Failure(kind, RemoteErrorClassifier.shortReason(message))
+    }
 
     private val _members = MutableStateFlow<List<RoomMember>>(emptyList())
     val members: StateFlow<List<RoomMember>> = _members.asStateFlow()
@@ -141,8 +181,13 @@ class RoomRemoteSource(
             val code = RoomCode.generate()
             val reference = database.getReference("rooms").child(code)
 
-            val exists = runCatching { reference.get().await().exists() }.getOrDefault(true)
-            if (exists) return@repeat
+            // Ошибку чтения больше не выдаём за «код занят»: иначе сеть или
+            // правила съедали все 8 попыток, а пользователь видел
+            // «Что-то пошло не так» вместо настоящей причины
+            val snapshot = runCatching { reference.get().await() }
+                .getOrElse { error -> return@withContext failureOf(error) }
+
+            if (snapshot.exists()) return@repeat
 
             val info = mutableMapOf<String, Any>(
                 "hostUid" to uid,
@@ -154,10 +199,10 @@ class RoomRemoteSource(
             val hash = passwordHash(code, password)
             if (hash.isNotBlank()) info["passwordHash"] = hash
 
-            val written = runCatching { reference.child("info").setValue(info).await() }.isSuccess
-            if (!written) {
-                return@withContext RoomResult.Failure(FailureKind.NO_CONNECTION)
-            }
+            // Возвращаемое значение нельзя игнорировать: ветка else должна
+            // завершать создание и отдавать причину отказа наружу
+            runCatching { reference.child("info").setValue(info).await() }
+                .onFailure { error -> return@withContext failureOf(error) }
 
             return@withContext joinInternal(
                 code = code,
@@ -168,7 +213,7 @@ class RoomRemoteSource(
             )
         }
 
-        RoomResult.Failure(FailureKind.UNKNOWN, "no_free_code")
+        RoomResult.Failure(FailureKind.NO_FREE_CODE, "no_free_code")
     }
 
     /** Входит в комнату по коду и паролю */
@@ -196,8 +241,8 @@ class RoomRemoteSource(
     ): RoomResult {
         val reference = database.getReference("rooms").child(code)
 
-        val snapshot = runCatching { reference.get().await() }.getOrElse {
-            return RoomResult.Failure(FailureKind.NO_CONNECTION)
+        val snapshot = runCatching { reference.get().await() }.getOrElse { error ->
+            return failureOf(error)
         }
 
         if (!snapshot.exists()) return RoomResult.Failure(FailureKind.NOT_FOUND)
@@ -233,12 +278,10 @@ class RoomRemoteSource(
             "joinedAt" to ServerValue.TIMESTAMP
         )
 
-        val written = runCatching {
+        runCatching {
             memberReference.onDisconnect().removeValue().await()
             memberReference.setValue(payload).await()
-        }.isSuccess
-
-        if (!written) return RoomResult.Failure(FailureKind.NO_CONNECTION)
+        }.onFailure { error -> return failureOf(error) }
 
         activeCode = code
         activeUid = uid

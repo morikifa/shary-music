@@ -61,6 +61,7 @@ import com.example.sharedmusic.ui.theme.SharyTheme
 fun RoomEntryScreen(
     isLoading: Boolean,
     notice: String?,
+    noticeDetails: String?,
     onCreateRoom: (capacity: Int, password: String) -> Unit,
     onJoinRoom: (code: String, password: String) -> Unit,
     onBack: () -> Unit,
@@ -286,6 +287,21 @@ fun RoomEntryScreen(
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             )
+
+            // Техническая причина: по ней видно, виновата сеть, адрес базы
+            // или правила Realtime Database в консоли Firebase
+            Text(
+                text = stringResource(
+                    R.string.room_error_details,
+                    noticeDetails ?: stringResource(R.string.room_error_details_unknown)
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp, start = 8.dp, end = 8.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -447,6 +463,7 @@ private fun RoomEntryPreview() {
         RoomEntryScreen(
             isLoading = false,
             notice = null,
+            noticeDetails = null,
             onCreateRoom = { _, _ -> },
             onJoinRoom = { _, _ -> },
             onBack = {}

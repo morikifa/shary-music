@@ -223,3 +223,36 @@ Consequences:
   can call `play()`/`seekTo()` safely — the command is queued, not rejected;
 - `kotlinx-coroutines-android` is now an explicit dependency instead of a
   transitive one, because `Dispatchers.Main` is load-bearing.
+
+---
+
+## D-013 — One message per failure; the real reason is shown and logged
+
+**Date:** 2026-11-05
+**Status:** accepted
+
+Creating a room failed with "Нет соединения с сервером" while the network was
+fine. Every failed Realtime Database write was caught by `runCatching` and
+turned into a single `FailureKind.NO_CONNECTION`; the original exception was
+dropped, so neither the screen nor logcat said what happened.
+
+Changes:
+
+- `FailureKind` gained `PERMISSION_DENIED` (the database refused the write,
+  fixed in the Firebase console) and `NO_FREE_CODE` (all generated codes were
+  taken). `NO_CONNECTION` now means the request never reached the server.
+- `RemoteErrorClassifier` (domain, pure functions) maps an error message to a
+  category: permission keywords, network keywords, otherwise unknown. Unit
+  tested in `RemoteErrorClassifierTest`.
+- `RoomRemoteSource.failureOf()` logs the original message with `Log.e` under
+  the tag `SharyRoom` and passes a shortened copy to the ViewModel.
+- `RoomViewModel.noticeDetails` exposes that technical line; `RoomEntryScreen`
+  prints it under the main message with `room_error_details`.
+- `createRoom` no longer treats a failed code-existence check as "code taken":
+  it reports the failure instead of burning all eight attempts.
+
+Consequences:
+
+- the user-facing sentence still comes from `strings.xml` (rule D-010);
+- the English Firebase text appears only as a secondary, labelled detail;
+- the cause of a room failure is identifiable in one `adb logcat` grep.
