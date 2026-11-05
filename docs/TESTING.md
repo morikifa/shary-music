@@ -41,8 +41,7 @@ These must be repeated on a real device after UI changes.
 5. Drag the vinyl clockwise: position grows, the time label updates, and the
    position is applied when the finger is released.
 5a. Drag the thin bar under the controls: it turns pink, the left time label
-   follows the finger, on release playback jumps to that position. Rotating the
-   phone mid-drag keeps the drag.
+   follows the finger, on release playback jumps to that position.
 6. Enable shuffle and repeat-one: icons turn pink, only one is active at a time.
 7. Like a track: the heart fills and stays filled after an app restart.
 8. Restart the app: the library and liked tracks are still there.

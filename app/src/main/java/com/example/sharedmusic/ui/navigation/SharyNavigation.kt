@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.sharedmusic.R
 import com.example.sharedmusic.data.model.RoomRole
 import com.example.sharedmusic.data.model.Track
 import com.example.sharedmusic.ui.screens.ChatSheet
@@ -220,7 +221,14 @@ fun SharyNavigation(
                     ProfileRoute(
                         appViewModel = appViewModel,
                         onBack = { navController.popBackStack() },
-                        onOpenHistory = { navController.navigate(Routes.HISTORY) }
+                        onOpenHistory = { navController.navigate(Routes.HISTORY) },
+                        onSignedOut = {
+                            // После выхода имя сброшено — снова онбординг,
+                            // и весь прежний стек убирается целиком
+                            navController.navigate(Routes.ONBOARDING) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
                     )
                 }
 
@@ -532,7 +540,8 @@ private fun ChatRoute(
 private fun ProfileRoute(
     appViewModel: AppViewModel,
     onBack: () -> Unit,
-    onOpenHistory: () -> Unit
+    onOpenHistory: () -> Unit,
+    onSignedOut: () -> Unit
 ) {
     val profile by appViewModel.profile.collectAsStateWithLifecycle()
     val trackCount by appViewModel.trackCount.collectAsStateWithLifecycle()
@@ -550,11 +559,7 @@ private fun ProfileRoute(
         onOpenHistory = onOpenHistory,
         onSignOut = {
             appViewModel.signOut()
-            // После выхода имя сброшено — пользователь снова проходит онбординг,
-            // а весь прежний стек убирается целиком.
-            navController.navigate(Routes.ONBOARDING) {
-                popUpTo(navController.graph.id) { inclusive = true }
-            }
+            onSignedOut()
         }
     )
 }

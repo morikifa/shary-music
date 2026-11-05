@@ -50,7 +50,8 @@ data flows down, events flow up.
 - **Empty library:** the "no tracks" text is shown instead of the carousel.
 - **Seeking:** the thin bar under the control row is grey and turns pink while
   dragging; the time label follows the finger and the position is applied on
-  release (`onSeek`). Rotation of the screen keeps the drag state.
+  release (`onSeek`). The drag state is not persisted across rotation on
+  purpose: it lives seconds at a time.
 - **Track missing (room):** status row shows "Трек недоступен на вашем
   устройстве" and a download button; playback controls stay disabled.
 - **Guest without rights:** controls are disabled, the title says who controls playback.

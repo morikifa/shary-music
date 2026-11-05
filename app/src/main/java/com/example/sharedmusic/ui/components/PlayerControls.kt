@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,8 +67,10 @@ fun PlayerControls(
     onSeek: (Long) -> Unit = {}
 ) {
     // Во время перетаскивания полосы показываем позицию пальца, а не плеера.
-    // rememberSaveable: поворот экрана не должен «терять» перемотку.
-    var scrubFraction by rememberSaveable { mutableStateOf<Float?>(null) }
+    // null — полоса не тронута. remember, а не rememberSaveable: null-значение
+    // в MutableState не сохраняется SaveableStateRegistry, а перемотка
+    // заведомо короткая — терять её при повороте безопасно.
+    var scrubFraction by remember { mutableStateOf<Float?>(null) }
 
     val playScale by animateFloatAsState(
         targetValue = if (isPlaying) 1f else 0.96f,
