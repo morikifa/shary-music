@@ -227,8 +227,10 @@ private fun DrawScope.drawDisc(radius: Float, center: Offset) {
 
         for (point in 0..points) {
             val angle = 2.0 * PI * point / points
-            // Волна по кругу: бороздки выглядят «живыми», как в макете
-            val wave = sin(angle * 9.0 + fraction * 4.0) * radius * 0.012f
+            // Волна по кругу: бороздки выглядят «живыми», как в макете.
+            // sin возвращает Double, поэтому приводим к Float до умножения
+            // на Float-радиус — иначе вся геометрия станет Double
+            val wave = sin(angle * 9.0 + fraction * 4.0).toFloat() * radius * 0.012f
             val r = grooveRadius + wave
             val x = center.x + cos(angle).toFloat() * r
             val y = center.y + sin(angle).toFloat() * r
@@ -238,6 +240,8 @@ private fun DrawScope.drawDisc(radius: Float, center: Offset) {
 
         val alpha = if (index % 2 == 0) 0.28f else 0.16f
 
+        // Path в Compose двумерный: x/y имеют тип Float, поэтому точка
+        // на окружности приводится к Float до вызова moveTo/lineTo
         drawPath(
             path = path,
             color = Color.White.copy(alpha = alpha),

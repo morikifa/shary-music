@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -42,6 +43,7 @@ import com.example.sharedmusic.domain.TimeFormat
 import com.example.sharedmusic.ui.components.SharyIconButton
 import com.example.sharedmusic.ui.components.SharyLogo
 import com.example.sharedmusic.ui.theme.SharyPink
+import kotlinx.coroutines.launch
 
 /**
  * Чат комнаты.
@@ -65,6 +67,10 @@ fun ChatSheet(
 ) {
     val listState = rememberLazyListState()
     var stickToBottom by remember { mutableStateOf(true) }
+
+    // animateScrollToItem — suspend-функция, поэтому прокрутка запускается
+    // из области корутин экрана, а не напрямую из обработчика нажатия
+    val scope = rememberCoroutineScope()
 
     // Как только лента снова прокручена вниз, автопрокрутка возвращается
     LaunchedEffect(listState) {
@@ -168,7 +174,9 @@ fun ChatSheet(
                             .background(MaterialTheme.colorScheme.primary)
                             .clickable {
                                 stickToBottom = true
-                                listState.animateScrollToItem(messages.lastIndex)
+                                scope.launch {
+                                    listState.animateScrollToItem(messages.lastIndex)
+                                }
                             }
                             .padding(horizontal = 14.dp, vertical = 6.dp)
                     )
