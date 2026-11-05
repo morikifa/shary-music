@@ -70,7 +70,11 @@ The filter is applied on top of the search query; an empty result shows a
 dedicated message instead of the generic "no tracks" text.
 
 Events: `onTrackClick`, `onToggleLike`, `onDelete`, `onSearchChange`,
-`onSearchOpen`, `onSearchClose`, `onBack`.
+`onSearchOpen`, `onSearchClose`, `onBack`, and the optional `onShareTrack`.
+
+`onShareTrack` is non-null only when the list was opened from an active room:
+each row then shows a send icon that uploads that track to the room and returns
+to the room screen.
 
 States: empty library, no search results, delete confirmation dialog.
 

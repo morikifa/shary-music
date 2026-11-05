@@ -31,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sharedmusic.data.model.RoomRole
+import com.example.sharedmusic.data.model.Track
 import com.example.sharedmusic.ui.screens.ChatSheet
 import com.example.sharedmusic.ui.screens.HistoryScreen
 import com.example.sharedmusic.ui.screens.OnboardingScreen
@@ -139,9 +140,20 @@ fun SharyNavigation(
                 }
 
                 composable(Routes.TRACK_LIST) {
+                    val activeRoom by roomViewModel.roomCode.collectAsStateWithLifecycle()
+
+                    // Если экран открыт из комнаты, в строках появляется отправка трека
                     TrackListRoute(
                         playerViewModel = playerViewModel,
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        onShareTrack = if (activeRoom == null) {
+                            null
+                        } else {
+                            { track ->
+                                roomViewModel.shareTrack(track)
+                                navController.popBackStack()
+                            }
+                        }
                     )
                 }
 
@@ -175,6 +187,7 @@ fun SharyNavigation(
                         roomViewModel = roomViewModel,
                         playerViewModel = playerViewModel,
                         onOpenChat = { navController.navigate(Routes.CHAT) },
+                        onOpenShareLibrary = { navController.navigate(Routes.TRACK_LIST) },
                         onLeftRoom = {
                             navController.navigate(Routes.PLAYER) {
                                 popUpTo(Routes.PLAYER) { inclusive = true }
@@ -318,7 +331,8 @@ private fun PlayerRoute(
 @Composable
 private fun TrackListRoute(
     playerViewModel: PlayerViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onShareTrack: ((Track) -> Unit)? = null
 ) {
     val currentTrackId by playerViewModel.currentTrackId.collectAsStateWithLifecycle()
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
@@ -334,6 +348,7 @@ private fun TrackListRoute(
         isSearchActive = isSearchActive,
         canDelete = true,
         onTrackClick = playerViewModel::playTrack,
+        onShareTrack = onShareTrack,
         onToggleLike = playerViewModel::toggleLike,
         onDelete = playerViewModel::deleteTrack,
         onSearchChange = playerViewModel::updateSearch,
@@ -349,7 +364,8 @@ private fun RoomRoute(
     roomViewModel: RoomViewModel,
     playerViewModel: PlayerViewModel,
     onOpenChat: () -> Unit,
-    onLeftRoom: () -> Unit
+    onLeftRoom: () -> Unit,
+    onOpenShareLibrary: () -> Unit
 ) {
     val roomCode by roomViewModel.roomCode.collectAsStateWithLifecycle()
     val role by roomViewModel.role.collectAsStateWithLifecycle()
@@ -450,7 +466,8 @@ private fun RoomRoute(
             onSeek = playerViewModel::seekTo,
             onOpenChat = onOpenChat,
             onOpenLibraryToShare = {
-                playerViewModel.tracks.value.firstOrNull()?.let(roomViewModel::shareTrack)
+                // Открываем библиотеку: хост выбирает, какой трек отправить участникам
+                onOpenShareLibrary()
             },
             onOpenSearch = {},
             onCloseSearch = {},

@@ -96,6 +96,7 @@
     <string name="room_kick_confirm">Удалить %1$s из комнаты?</string>
     <string name="room_member_no_rights">Права есть только у хоста комнаты</string>
     <string name="room_add_track">Добавить трек в комнату</string>
+    <string name="room_track_share">Отправить трек участникам</string>
     <string name="room_download_missing">Скачать недостающие треки</string>
     <string name="room_download_progress">Загрузка: %1$d%%</string>
 

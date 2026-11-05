@@ -173,6 +173,11 @@ connected:
   (`SharyApplication.syncEqualizer()` is also called after the first track
   starts, because the session id is only known then).
 
+Sharing a track from the room now opens the library (`+` in the vertical rail
+and the pink corner stay where they are): `TrackListScreen.onShareTrack` is
+non-null only inside a room, so the same screen serves both entry points
+without a second list.
+
 Not implemented on purpose: `MediaSessionService` and background playback
 (see D-007), and a 10-band editor — the equalizer exposes four bands mapped
 onto real device bands.

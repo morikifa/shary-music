@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,6 +60,7 @@ fun TrackListScreen(
     isSearchActive: Boolean,
     canDelete: Boolean,
     onTrackClick: (Track) -> Unit,
+    onShareTrack: ((Track) -> Unit)? = null,
     onToggleLike: (Track) -> Unit,
     onDelete: (Track) -> Unit,
     onSearchChange: (String) -> Unit,
@@ -160,6 +162,7 @@ fun TrackListScreen(
                     isCurrent = track.id == currentTrackId,
                     isPlaying = isPlaying && track.id == currentTrackId,
                     canDelete = canDelete,
+                    onShare = onShareTrack?.let { share -> { share(track) } },
                     onClick = { onTrackClick(track) },
                     onToggleLike = { onToggleLike(track) },
                     onDelete = { trackToDelete = track }
@@ -227,6 +230,7 @@ private fun TrackRow(
     isCurrent: Boolean,
     isPlaying: Boolean,
     canDelete: Boolean,
+    onShare: (() -> Unit)?,
     onClick: () -> Unit,
     onToggleLike: () -> Unit,
     onDelete: () -> Unit
@@ -287,6 +291,17 @@ private fun TrackRow(
                 color = MaterialTheme.colorScheme.primary,
                 size = 14.dp,
                 modifier = Modifier.padding(end = 6.dp)
+            )
+        }
+
+        // Отправка трека участникам комнаты: доступна только из комнаты
+        if (onShare != null) {
+            SharyIconButton(
+                icon = Icons.Rounded.Send,
+                contentDescription = stringResource(R.string.room_track_share),
+                onClick = onShare,
+                size = 40.dp,
+                iconSize = 19.dp
             )
         }
 
@@ -363,6 +378,7 @@ private fun TrackListPreview() {
             isSearchActive = false,
             canDelete = true,
             onTrackClick = {},
+            onShareTrack = {},
             onToggleLike = {},
             onDelete = {},
             onSearchChange = {},
