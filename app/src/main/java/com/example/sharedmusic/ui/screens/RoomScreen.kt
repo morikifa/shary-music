@@ -101,8 +101,6 @@ fun RoomScreen(
     currentUid: String?,
     isHost: Boolean,
     canControl: Boolean,
-    isSearchActive: Boolean,
-    searchQuery: String,
     transferProgress: Int?,
     onLeaveRoom: () -> Unit,
     onCopyCode: (String) -> Unit,
@@ -120,9 +118,6 @@ fun RoomScreen(
     onSeek: (Long) -> Unit,
     onOpenChat: () -> Unit,
     onOpenLibraryToShare: () -> Unit,
-    onOpenSearch: () -> Unit,
-    onCloseSearch: () -> Unit,
-    onSearchChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var memberForKick by remember { mutableStateOf<RoomMember?>(null) }
@@ -796,8 +791,6 @@ private fun RoomScreenPreview() {
             currentUid = "1",
             isHost = true,
             canControl = true,
-            isSearchActive = false,
-            searchQuery = "",
             transferProgress = null,
             onLeaveRoom = {},
             onCopyCode = {},
@@ -815,9 +808,6 @@ private fun RoomScreenPreview() {
             onSeek = {},
             onOpenChat = {},
             onOpenLibraryToShare = {},
-            onOpenSearch = {},
-            onCloseSearch = {},
-            onSearchChange = {}
         )
     }
 }
@@ -842,8 +832,6 @@ private fun RoomScreenGuestPreview() {
             currentUid = "2",
             isHost = false,
             canControl = false,
-            isSearchActive = false,
-            searchQuery = "",
             transferProgress = 40,
             onLeaveRoom = {},
             onCopyCode = {},
@@ -861,9 +849,6 @@ private fun RoomScreenGuestPreview() {
             onSeek = {},
             onOpenChat = {},
             onOpenLibraryToShare = {},
-            onOpenSearch = {},
-            onCloseSearch = {},
-            onSearchChange = {}
         )
     }
 }

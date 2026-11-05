@@ -108,11 +108,15 @@ code is incomplete.
 | `currentUid` | To mark "Вы" and to distinguish the host |
 | `isHost`, `canControl` | Rights for this device |
 | `transferProgress` | `null` or upload/download percent |
+| `members` header | shows "Участники" and "N из 5" (`room_participants_capacity`) |
 
 Events: `onLeaveRoom`, `onCopyCode`, `onShareCode`, `onOpenRoomSettings`,
 `onKickMember`, `onSelectTrack`, `onDownloadTrack`, `onPlayPause`, `onNext`,
 `onPrevious`, `onToggleShuffle`, `onToggleRepeat`, `onToggleLike`, `onSeek`,
 `onOpenChat`, `onOpenLibraryToShare`.
+
+There is no search state on this screen: the room playlist is short (2–5
+participants share one queue), so filtering would only hide tracks.
 
 States: host / member, track missing, transfer in progress, kick confirmation,
 room closed by host.

@@ -429,8 +429,6 @@ private fun RoomRoute(
             currentUid = roomViewModel.currentUid,
             isHost = isHost,
             canControl = canControl,
-            isSearchActive = false,
-            searchQuery = "",
             transferProgress = if (isTransferring) transferProgress else null,
             onLeaveRoom = roomViewModel::leaveRoom,
             onCopyCode = { value ->
@@ -468,10 +466,7 @@ private fun RoomRoute(
             onOpenLibraryToShare = {
                 // Открываем библиотеку: хост выбирает, какой трек отправить участникам
                 onOpenShareLibrary()
-            },
-            onOpenSearch = {},
-            onCloseSearch = {},
-            onSearchChange = {}
+            }
         )
 
         SnackbarHost(
