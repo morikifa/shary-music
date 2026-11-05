@@ -15,6 +15,7 @@
 | `PlaybackQueue` | next/previous wrap-around, repeat-one, shuffle never returns current |
 | `TrackIdentity` | stable hash, different inputs give different ids, hex length 64 |
 | `TimeFormat` | mm:ss, h:mm:ss, negative values, hours rounding |
+| `ListenDuration` | below a minute, minutes only, hours + minutes, negative input |
 
 Run:
 

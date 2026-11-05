@@ -140,7 +140,9 @@ States: empty chat, error, offline.
   `onToggleWifiOnly(Boolean)`, `onChangeTheme(ThemeMode)`.
 - **Profile** — `onSaveName(String)`, `onSaveAvatar(String?)`, `onOpenHistory`,
   `onSignOut`; state: profile, track count, liked count, hours in rooms.
-- **History** — `onClear`, `onBack`; entries grouped by day.
+- **History** — `onClear`, `onBack`; entries grouped by day. Listened time is
+  rendered from `ListenDuration` (domain) plus `history_minutes` /
+  `history_hours_minutes`, so the units come from resources.
 - **Onboarding** — `onContinue(String)`; only a display name is requested.
 
 ---

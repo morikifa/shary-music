@@ -219,3 +219,27 @@ class TimeFormatTest {
         assertEquals("1.5", TimeFormat.hours(5_400_000))
     }
 }
+
+class ListenDurationTest {
+
+    @Test
+    fun `меньше минуты выделяется в отдельный вариант`() {
+        assertEquals(ListenDuration.LessThanMinute, ListenDuration.of(59_000))
+    }
+
+    @Test
+    fun `минуты отбрасывают неполные секунды`() {
+        assertEquals(ListenDuration.Minutes(12), ListenDuration.of(12 * 60_000 + 59_000))
+    }
+
+    @Test
+    fun `час и минуты раскладываются раздельно`() {
+        assertEquals(ListenDuration.Hours(1, 5), ListenDuration.of(65 * 60_000))
+        assertEquals(ListenDuration.Hours(2, 0), ListenDuration.of(120 * 60_000))
+    }
+
+    @Test
+    fun `отрицательное значение считается нулевым`() {
+        assertEquals(ListenDuration.LessThanMinute, ListenDuration.of(-1_000))
+    }
+}

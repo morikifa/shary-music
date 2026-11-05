@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sharedmusic.R
 import com.example.sharedmusic.data.model.HistoryEntry
-import com.example.sharedmusic.domain.TimeFormat
+import com.example.sharedmusic.domain.ListenDuration
 import com.example.sharedmusic.ui.components.SharyIconButton
 import com.example.sharedmusic.ui.components.SharyTopBar
 import com.example.sharedmusic.ui.components.TrackArtwork
@@ -187,7 +187,7 @@ private fun HistoryRow(entry: HistoryEntry) {
                     modeLabel(entry.roomCode),
                     stringResource(
                         R.string.history_duration,
-                        TimeFormat.shortDuration(entry.listenedMs)
+                        listenDurationLabel(entry.listenedMs)
                     )
                 ),
                 style = MaterialTheme.typography.labelSmall,
@@ -197,6 +197,19 @@ private fun HistoryRow(entry: HistoryEntry) {
 
     }
 }
+
+/** Подпись длительности прослушивания в понятных человеку единицах */
+@Composable
+private fun listenDurationLabel(listenedMs: Long): String =
+    when (val duration = ListenDuration.of(listenedMs)) {
+        is ListenDuration.LessThanMinute -> stringResource(R.string.history_less_than_minute)
+        is ListenDuration.Minutes -> stringResource(R.string.history_minutes, duration.minutes)
+        is ListenDuration.Hours -> stringResource(
+            R.string.history_hours_minutes,
+            duration.hours,
+            duration.minutes
+        )
+    }
 
 /** Подпись режима прослушивания: «Локально» или «Комната ABC123» */
 @Composable

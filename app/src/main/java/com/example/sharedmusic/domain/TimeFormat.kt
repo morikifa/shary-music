@@ -17,21 +17,6 @@ object TimeFormat {
         }
     }
 
-    /** «12 мин» для статистики профиля */
-    fun shortDuration(milliseconds: Long): String {
-        val totalMinutes = milliseconds.coerceAtLeast(0L) / 60_000L
-
-        return when {
-            totalMinutes < 1L -> "меньше минуты"
-            totalMinutes < 60L -> "$totalMinutes мин"
-            else -> {
-                val hours = totalMinutes / 60L
-                val minutes = totalMinutes % 60L
-                if (minutes == 0L) "$hours ч" else "$hours ч $minutes мин"
-            }
-        }
-    }
-
     /** Часы прослушивания в комнатах для профиля, с одним знаком после запятой */
     fun hours(totalMillis: Long): String {
         val hours = totalMillis.toDouble() / 3_600_000.0
